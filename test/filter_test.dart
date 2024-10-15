@@ -18,8 +18,7 @@ void main() {
   group('Array Filters', () {
     test('join', () {
       expect(join([1, 2, 3], [', '], {}), equals('1, 2, 3'));
-      expect(
-          join(['a', 'b', 'c'], [], {}), equals('a b c')); // default separator
+      expect(join(['a', 'b', 'c'], [], {}), equals('a b c')); // default separator
       expect(join('not a list', [', '], {}), equals('not a list'));
     });
 
@@ -98,17 +97,13 @@ void main() {
       expect(slice('', [1, 2], {}), equals(''));
       expect(slice(123, [1, 2], {}), equals(123)); // non-string, non-list
       expect(slice([1, 2, 3], [10, 2], {}), equals([])); // start beyond end
-      expect(slice([1, 2, 3], [-1, 2], {}),
-          equals([3])); // negative index from end
-      expect(slice([1, 2, 3], [-2, 2], {}),
-          equals([2, 3])); // negative index from end
-      expect(slice([1, 2, 3], [0, 10], {}),
-          equals([1, 2, 3])); // length beyond end
+      expect(slice([1, 2, 3], [-1, 2], {}), equals([3])); // negative index from end
+      expect(slice([1, 2, 3], [-2, 2], {}), equals([2, 3])); // negative index from end
+      expect(slice([1, 2, 3], [0, 10], {}), equals([1, 2, 3])); // length beyond end
       expect(slice('abcde', [3, 5], {}), equals('de')); // string slice
       expect(slice([1], [0, 0], {}), equals([])); // zero length
       expect(slice([1, 2, 3], [1, -1], {}), equals([])); // negative length
-      expect(slice([1, 2, 3], [-5, 2], {}),
-          equals([1, 2])); // negative index beyond start
+      expect(slice([1, 2, 3], [-5, 2], {}), equals([1, 2])); // negative index beyond start
     });
   });
 
@@ -127,8 +122,7 @@ void main() {
     });
 
     test('uriEscape', () {
-      expect(uriEscape('http://example.com/path[1]/test', [], {}),
-          equals('http://example.com/path[1]/test'));
+      expect(uriEscape('http://example.com/path[1]/test', [], {}), equals('http://example.com/path[1]/test'));
     });
 
     test('slugify', () {
@@ -139,16 +133,13 @@ void main() {
       expect(slugify('Hello  World!', ['raw'], {}), equals('hello-world!'));
       expect(slugify('Hello World!', ['none'], {}), equals('Hello World!'));
       expect(slugify('Héllö Wörld!', ['latin'], {}), equals('hello-world'));
-      expect(slugify('Hello World!', ['default', true], {}),
-          equals('Hello-World'));
+      expect(slugify('Hello World!', ['default', true], {}), equals('Hello-World'));
       expect(slugify('Hello, World!', [], {}), equals('hello-world'));
       expect(slugify('   Hello,    World!   ', [], {}), equals('hello-world'));
       expect(slugify('Hello_World', ['pretty'], {}), equals('hello_world'));
       expect(slugify('Hello.World', ['pretty'], {}), equals('hello.world'));
-      expect(slugify('Hello World!', ['invalid'], {}),
-          equals('hello-world')); // default behavior
-      expect(slugify('Hello, World!', ['raw'], {}),
-          equals('hello,-world!')); // raw mode preserves punctuation
+      expect(slugify('Hello World!', ['invalid'], {}), equals('hello-world')); // default behavior
+      expect(slugify('Hello, World!', ['raw'], {}), equals('hello,-world!')); // raw mode preserves punctuation
     });
   });
 
@@ -238,16 +229,13 @@ void main() {
     });
 
     test('replaceFirst', () {
-      expect(
-          replaceFirst('Hello Hello', ['Hello', 'Hi'], {}), equals('Hi Hello'));
-      expect(
-          replaceFirst('Hello World', ['o', 'a'], {}), equals('Hella World'));
+      expect(replaceFirst('Hello Hello', ['Hello', 'Hi'], {}), equals('Hi Hello'));
+      expect(replaceFirst('Hello World', ['o', 'a'], {}), equals('Hella World'));
       expect(() => replaceFirst('Hello', ['o'], {}), throwsArgumentError);
     });
 
     test('replaceLast', () {
-      expect(
-          replaceLast('Hello Hello', ['Hello', 'Hi'], {}), equals('Hello Hi'));
+      expect(replaceLast('Hello Hello', ['Hello', 'Hi'], {}), equals('Hello Hi'));
       expect(replaceLast('Hello World', ['o', 'a'], {}), equals('Hello Warld'));
       expect(() => replaceLast('Hello', ['o'], {}), throwsArgumentError);
     });
@@ -259,20 +247,15 @@ void main() {
     });
 
     test('truncatewords', () {
-      expect(truncatewords('Hello World Foo Bar', [2], {}),
-          equals('Hello World...'));
+      expect(truncatewords('Hello World Foo Bar', [2], {}), equals('Hello World...'));
       expect(truncatewords('Hello', [2], {}), equals('Hello'));
-      expect(truncatewords('Hello World Foo Bar', [2, '---'], {}),
-          equals('Hello World---'));
+      expect(truncatewords('Hello World Foo Bar', [2, '---'], {}), equals('Hello World---'));
     });
 
     test('normalizeWhitespace', () {
-      expect(
-          normalizeWhitespace('Hello   World', [], {}), equals('Hello World'));
-      expect(normalizeWhitespace('   Hello   World   ', [], {}),
-          equals(' Hello World '));
-      expect(
-          normalizeWhitespace('Hello\nWorld', [], {}), equals('Hello World'));
+      expect(normalizeWhitespace('Hello   World', [], {}), equals('Hello World'));
+      expect(normalizeWhitespace('   Hello   World   ', [], {}), equals(' Hello World '));
+      expect(normalizeWhitespace('Hello\nWorld', [], {}), equals('Hello World'));
     });
 
     test('numberOfWords', () {
@@ -283,14 +266,25 @@ void main() {
     });
 
     test('arrayToSentenceString', () {
-      expect(arrayToSentenceString(['apple', 'banana', 'orange'], [], {}),
-          equals('apple, banana, and orange'));
-      expect(arrayToSentenceString(['apple', 'banana'], [], {}),
-          equals('apple and banana'));
+      expect(arrayToSentenceString(['apple', 'banana', 'orange'], [], {}), equals('apple, banana, and orange'));
+      expect(arrayToSentenceString(['apple', 'banana'], [], {}), equals('apple and banana'));
       expect(arrayToSentenceString(['apple'], [], {}), equals('apple'));
       expect(arrayToSentenceString([], [], {}), equals(''));
-      expect(arrayToSentenceString(['apple', 'banana', 'orange'], ['or'], {}),
-          equals('apple, banana, or orange'));
+      expect(arrayToSentenceString(['apple', 'banana', 'orange'], ['or'], {}), equals('apple, banana, or orange'));
+    });
+
+    test('parse_json_array', () {
+      expect(parseJsonArray('["a", "b", "c"]', [], {}), equals(['a', 'b', 'c']));
+      expect(parseJsonArray('[1, 2, 3]', [], {}), equals([1, 2, 3]));
+      expect(
+          parseJsonArray('[{"key": "value"}, {"key": "value2"}]', [], {}),
+          equals([
+            {'key': 'value'},
+            {'key': 'value2'}
+          ]));
+      expect(parseJsonArray('[]', [], {}), equals([]));
+      expect(parseJsonArray('[true, false, null]', [], {}), equals([true, false, null]));
+      expect(() => parseJsonArray('invalid json', [], {}), throwsFormatException);
     });
   });
 
@@ -308,8 +302,7 @@ void main() {
 
     test('json', () {
       expect(json({'a': 1, 'b': 2}, [], {}), equals('{"a":1,"b":2}'));
-      expect(
-          json({'a': 1, 'b': 2}, [2], {}), equals('{\n  "a": 1,\n  "b": 2\n}'));
+      expect(json({'a': 1, 'b': 2}, [2], {}), equals('{\n  "a": 1,\n  "b": 2\n}'));
       expect(json([1, 2, 3], [], {}), equals('[1,2,3]'));
       expect(json('string', [], {}), equals('"string"'));
       expect(json(42, [], {}), equals('42'));
@@ -324,8 +317,7 @@ void main() {
       var bMap = aMap['b'] as Map<String, dynamic>;
       bMap['c'] = aMap;
 
-      expect(inspect(nestedCircular, [], {}),
-          equals('{"a":{"b":{"c":"[Circular]"}}}'));
+      expect(inspect(nestedCircular, [], {}), equals('{"a":{"b":{"c":"[Circular]"}}}'));
     });
 
     test('toInteger', () {
@@ -499,8 +491,7 @@ void main() {
     });
 
     test('strip_html should strip all style tags and their contents', () {
-      final input =
-          '<style>cite { font-style: italic; }</style><cite>Ulysses<cite>?';
+      final input = '<style>cite { font-style: italic; }</style><cite>Ulysses<cite>?';
       expect(
         html.stripHtml(input, [], {}),
         equals("Ulysses?"),
@@ -516,8 +507,7 @@ void main() {
     });
 
     test('strip_html should strip all scripts tags and their contents', () {
-      final input =
-          '<script async>console.log(\'hello world\')</script><cite>Ulysses<cite>?';
+      final input = '<script async>console.log(\'hello world\')</script><cite>Ulysses<cite>?';
       expect(
         html.stripHtml(input, [], {}),
         equals("Ulysses?"),
@@ -553,34 +543,27 @@ void main() {
     test('date filter', () {
       expect(date('2023-05-15', ['yyyy-MM-dd'], {}), equals('2023-05-15'));
       expect(date('2023-05-15', ['MMMM d, yyyy'], {}), equals('May 15, 2023'));
-      expect(date('now', ['yyyy-MM-dd'], {}),
-          equals(DateFormat('yyyy-MM-dd').format(tz.TZDateTime.now(tz.local))));
+      expect(date('now', ['yyyy-MM-dd'], {}), equals(DateFormat('yyyy-MM-dd').format(tz.TZDateTime.now(tz.local))));
     });
 
     test('date_to_xmlschema filter', () {
-      expect(dateToXmlschema('2023-05-15', [], {}),
-          equals('2023-05-15T00:00:00.000-04:00'));
+      expect(dateToXmlschema('2023-05-15', [], {}), equals('2023-05-15T00:00:00.000-04:00'));
     });
 
     test('date_to_rfc822 filter', () {
-      expect(dateToRfc822('2023-05-15', [], {}),
-          equals('Mon, 15 May 2023 00:00:00 -0400'));
+      expect(dateToRfc822('2023-05-15', [], {}), equals('Mon, 15 May 2023 00:00:00 -0400'));
     });
 
     test('date_to_string filter', () {
       expect(dateToString('2023-05-15', [], {}), equals('15 May 2023'));
-      expect(
-          dateToString('2023-05-15', ['ordinal'], {}), equals('15th May 2023'));
-      expect(dateToString('2023-05-15', ['ordinal', 'US'], {}),
-          equals('May 15th, 2023'));
+      expect(dateToString('2023-05-15', ['ordinal'], {}), equals('15th May 2023'));
+      expect(dateToString('2023-05-15', ['ordinal', 'US'], {}), equals('May 15th, 2023'));
     });
 
     test('date_to_long_string filter', () {
       expect(dateToLongString('2023-05-15', [], {}), equals('15 May 2023'));
-      expect(dateToLongString('2023-05-15', ['ordinal'], {}),
-          equals('15th May 2023'));
-      expect(dateToLongString('2023-05-15', ['ordinal', 'US'], {}),
-          equals('May 15th, 2023'));
+      expect(dateToLongString('2023-05-15', ['ordinal'], {}), equals('15th May 2023'));
+      expect(dateToLongString('2023-05-15', ['ordinal', 'US'], {}), equals('May 15th, 2023'));
     });
   });
 }

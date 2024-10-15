@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:liquify/src/filter_registry.dart';
 import 'package:liquify/src/filters/module.dart';
 
@@ -10,8 +12,7 @@ import 'package:liquify/src/filters/module.dart';
 /// ```dart
 /// append('Hello', [' World']) // Returns: 'Hello World'
 /// ```
-FilterFunction append = (dynamic value, List<dynamic> arguments,
-    Map<String, dynamic> namedArguments) {
+FilterFunction append = (dynamic value, List<dynamic> arguments, Map<String, dynamic> namedArguments) {
   if (arguments.isEmpty) throw ArgumentError('append expects 1 argument');
   String str = value.toString();
   String arg = arguments[0].toString();
@@ -27,8 +28,7 @@ FilterFunction append = (dynamic value, List<dynamic> arguments,
 /// ```dart
 /// prepend('World', ['Hello ']) // Returns: 'Hello World'
 /// ```
-FilterFunction prepend = (dynamic value, List<dynamic> arguments,
-    Map<String, dynamic> namedArguments) {
+FilterFunction prepend = (dynamic value, List<dynamic> arguments, Map<String, dynamic> namedArguments) {
   if (arguments.isEmpty) throw ArgumentError('prepend expects 1 argument');
   String str = value.toString();
   String arg = arguments[0].toString();
@@ -45,8 +45,7 @@ FilterFunction prepend = (dynamic value, List<dynamic> arguments,
 /// lstrip('  Hello', []) // Returns: 'Hello'
 /// lstrip('xxHello', ['x']) // Returns: 'Hello'
 /// ```
-FilterFunction lstrip = (dynamic value, List<dynamic> arguments,
-    Map<String, dynamic> namedArguments) {
+FilterFunction lstrip = (dynamic value, List<dynamic> arguments, Map<String, dynamic> namedArguments) {
   String str = value.toString();
   if (arguments.isEmpty) {
     return str.trimLeft();
@@ -64,8 +63,7 @@ FilterFunction lstrip = (dynamic value, List<dynamic> arguments,
 /// ```dart
 /// downcase('HELLO') // Returns: 'hello'
 /// ```
-FilterFunction downcase = (dynamic value, List<dynamic> arguments,
-    Map<String, dynamic> namedArguments) {
+FilterFunction downcase = (dynamic value, List<dynamic> arguments, Map<String, dynamic> namedArguments) {
   return value.toString().toLowerCase();
 };
 
@@ -77,8 +75,7 @@ FilterFunction downcase = (dynamic value, List<dynamic> arguments,
 /// ```dart
 /// upcase('hello') // Returns: 'HELLO'
 /// ```
-FilterFunction upcase = (dynamic value, List<dynamic> arguments,
-    Map<String, dynamic> namedArguments) {
+FilterFunction upcase = (dynamic value, List<dynamic> arguments, Map<String, dynamic> namedArguments) {
   return value.toString().toUpperCase();
 };
 
@@ -91,8 +88,7 @@ FilterFunction upcase = (dynamic value, List<dynamic> arguments,
 /// ```dart
 /// remove('Hello World', ['o']) // Returns: 'Hell Wrld'
 /// ```
-FilterFunction remove = (dynamic value, List<dynamic> arguments,
-    Map<String, dynamic> namedArguments) {
+FilterFunction remove = (dynamic value, List<dynamic> arguments, Map<String, dynamic> namedArguments) {
   if (arguments.isEmpty) throw ArgumentError('remove expects 1 argument');
   String str = value.toString();
   String arg = arguments[0].toString();
@@ -108,8 +104,7 @@ FilterFunction remove = (dynamic value, List<dynamic> arguments,
 /// ```dart
 /// removeFirst('Hello Hello World', ['Hello ']) // Returns: 'Hello World'
 /// ```
-FilterFunction removeFirst = (dynamic value, List<dynamic> arguments,
-    Map<String, dynamic> namedArguments) {
+FilterFunction removeFirst = (dynamic value, List<dynamic> arguments, Map<String, dynamic> namedArguments) {
   if (arguments.isEmpty) throw ArgumentError('remove_first expects 1 argument');
   String str = value.toString();
   String arg = arguments[0].toString();
@@ -125,8 +120,7 @@ FilterFunction removeFirst = (dynamic value, List<dynamic> arguments,
 /// ```dart
 /// removeLast('Hello Hello World', ['Hello ']) // Returns: 'Hello World'
 /// ```
-FilterFunction removeLast = (dynamic value, List<dynamic> arguments,
-    Map<String, dynamic> namedArguments) {
+FilterFunction removeLast = (dynamic value, List<dynamic> arguments, Map<String, dynamic> namedArguments) {
   if (arguments.isEmpty) throw ArgumentError('remove_last expects 1 argument');
   String str = value.toString();
   String arg = arguments[0].toString();
@@ -145,8 +139,7 @@ FilterFunction removeLast = (dynamic value, List<dynamic> arguments,
 /// rstrip('Hello  ', []) // Returns: 'Hello'
 /// rstrip('Helloxx', ['x']) // Returns: 'Hello'
 /// ```
-FilterFunction rstrip = (dynamic value, List<dynamic> arguments,
-    Map<String, dynamic> namedArguments) {
+FilterFunction rstrip = (dynamic value, List<dynamic> arguments, Map<String, dynamic> namedArguments) {
   String str = value.toString();
   if (arguments.isEmpty) {
     return str.trimRight();
@@ -165,8 +158,7 @@ FilterFunction rstrip = (dynamic value, List<dynamic> arguments,
 /// ```dart
 /// split('Hello World', [' ']) // Returns: ['Hello', 'World']
 /// ```
-FilterFunction split = (dynamic value, List<dynamic> arguments,
-    Map<String, dynamic> namedArguments) {
+FilterFunction split = (dynamic value, List<dynamic> arguments, Map<String, dynamic> namedArguments) {
   if (arguments.isEmpty) throw ArgumentError('split expects 1 argument');
   String str = value.toString();
   String delimiter = arguments[0].toString();
@@ -187,16 +179,13 @@ FilterFunction split = (dynamic value, List<dynamic> arguments,
 /// strip('  Hello  ', []) // Returns: 'Hello'
 /// strip('xxHelloxx', ['x']) // Returns: 'Hello'
 /// ```
-FilterFunction strip = (dynamic value, List<dynamic> arguments,
-    Map<String, dynamic> namedArguments) {
+FilterFunction strip = (dynamic value, List<dynamic> arguments, Map<String, dynamic> namedArguments) {
   String str = value.toString();
   if (arguments.isEmpty) {
     return str.trim();
   } else {
     String chars = RegExp.escape(arguments[0].toString());
-    return str
-        .replaceFirst(RegExp('^[$chars]+'), '')
-        .replaceFirst(RegExp('[$chars]+\$'), '');
+    return str.replaceFirst(RegExp('^[$chars]+'), '').replaceFirst(RegExp('[$chars]+\$'), '');
   }
 };
 
@@ -208,8 +197,7 @@ FilterFunction strip = (dynamic value, List<dynamic> arguments,
 /// ```dart
 /// stripNewlines('Hello\nWorld') // Returns: 'HelloWorld'
 /// ```
-FilterFunction stripNewlines = (dynamic value, List<dynamic> arguments,
-    Map<String, dynamic> namedArguments) {
+FilterFunction stripNewlines = (dynamic value, List<dynamic> arguments, Map<String, dynamic> namedArguments) {
   return value.toString().replaceAll(RegExp(r'\r?\n'), '');
 };
 
@@ -221,8 +209,7 @@ FilterFunction stripNewlines = (dynamic value, List<dynamic> arguments,
 /// ```dart
 /// capitalize('hello WORLD') // Returns: 'Hello world'
 /// ```
-FilterFunction capitalize = (dynamic value, List<dynamic> arguments,
-    Map<String, dynamic> namedArguments) {
+FilterFunction capitalize = (dynamic value, List<dynamic> arguments, Map<String, dynamic> namedArguments) {
   String str = value.toString();
   if (str.isEmpty) return str;
   return str[0].toUpperCase() + str.substring(1).toLowerCase();
@@ -237,8 +224,7 @@ FilterFunction capitalize = (dynamic value, List<dynamic> arguments,
 /// ```dart
 /// replace('Hello World', ['o', 'a']) // Returns: 'Hella Warld'
 /// ```
-FilterFunction replace = (dynamic value, List<dynamic> arguments,
-    Map<String, dynamic> namedArguments) {
+FilterFunction replace = (dynamic value, List<dynamic> arguments, Map<String, dynamic> namedArguments) {
   if (arguments.length < 2) {
     throw ArgumentError('replace expects 2 arguments');
   }
@@ -257,8 +243,7 @@ FilterFunction replace = (dynamic value, List<dynamic> arguments,
 /// ```dart
 /// replaceFirst('Hello Hello World', ['Hello', 'Hi']) // Returns: 'Hi Hello World'
 /// ```
-FilterFunction replaceFirst = (dynamic value, List<dynamic> arguments,
-    Map<String, dynamic> namedArguments) {
+FilterFunction replaceFirst = (dynamic value, List<dynamic> arguments, Map<String, dynamic> namedArguments) {
   if (arguments.length < 2) {
     throw ArgumentError('replace_first expects 2 arguments');
   }
@@ -277,8 +262,7 @@ FilterFunction replaceFirst = (dynamic value, List<dynamic> arguments,
 /// ```dart
 /// replaceLast('Hello Hello World', ['Hello', 'Hi']) // Returns: 'Hello Hi World'
 /// ```
-FilterFunction replaceLast = (dynamic value, List<dynamic> arguments,
-    Map<String, dynamic> namedArguments) {
+FilterFunction replaceLast = (dynamic value, List<dynamic> arguments, Map<String, dynamic> namedArguments) {
   if (arguments.length < 2) {
     throw ArgumentError('replace_last expects 2 arguments');
   }
@@ -287,9 +271,7 @@ FilterFunction replaceLast = (dynamic value, List<dynamic> arguments,
   String replacement = arguments[1].toString();
   int index = str.lastIndexOf(pattern);
   if (index == -1) return str;
-  return str.substring(0, index) +
-      replacement +
-      str.substring(index + pattern.length);
+  return str.substring(0, index) + replacement + str.substring(index + pattern.length);
 };
 
 /// Truncates a string to a specified length.
@@ -302,8 +284,7 @@ FilterFunction replaceLast = (dynamic value, List<dynamic> arguments,
 /// truncate('Hello World', [5]) // Returns: 'He...'
 /// truncate('Hello World', [5, '---']) // Returns: 'He---'
 /// ```
-FilterFunction truncate = (dynamic value, List<dynamic> arguments,
-    Map<String, dynamic> namedArguments) {
+FilterFunction truncate = (dynamic value, List<dynamic> arguments, Map<String, dynamic> namedArguments) {
   String str = value.toString();
   int length = arguments.isNotEmpty ? arguments[0] as int : 50;
   String ellipsis = arguments.length > 1 ? arguments[1].toString() : '...';
@@ -321,8 +302,7 @@ FilterFunction truncate = (dynamic value, List<dynamic> arguments,
 /// truncatewords('Hello World Foo Bar', [2]) // Returns: 'Hello World...'
 /// truncatewords('Hello World Foo Bar', [2, '---']) // Returns: 'Hello World---'
 /// ```
-FilterFunction truncatewords = (dynamic value, List<dynamic> arguments,
-    Map<String, dynamic> namedArguments) {
+FilterFunction truncatewords = (dynamic value, List<dynamic> arguments, Map<String, dynamic> namedArguments) {
   String str = value.toString();
   int words = arguments.isNotEmpty ? arguments[0] as int : 15;
   String ellipsis = arguments.length > 1 ? arguments[1].toString() : '...';
@@ -340,8 +320,7 @@ FilterFunction truncatewords = (dynamic value, List<dynamic> arguments,
 /// ```dart
 /// normalizeWhitespace('Hello   World') // Returns: 'Hello World'
 /// ```
-FilterFunction normalizeWhitespace = (dynamic value, List<dynamic> arguments,
-    Map<String, dynamic> namedArguments) {
+FilterFunction normalizeWhitespace = (dynamic value, List<dynamic> arguments, Map<String, dynamic> namedArguments) {
   return value.toString().replaceAll(RegExp(r'\s+'), ' ');
 };
 
@@ -356,23 +335,19 @@ FilterFunction normalizeWhitespace = (dynamic value, List<dynamic> arguments,
 /// numberOfWords('你好世界', ['cjk']) // Returns: 4
 /// numberOfWords('Hello 世界', ['auto']) // Returns: 3
 /// ```
-FilterFunction numberOfWords = (dynamic value, List<dynamic> arguments,
-    Map<String, dynamic> namedArguments) {
+FilterFunction numberOfWords = (dynamic value, List<dynamic> arguments, Map<String, dynamic> namedArguments) {
   String str = value.toString().trim();
   if (str.isEmpty) return 0;
   String mode = arguments.isNotEmpty ? arguments[0].toString() : '';
 
-  RegExp rCJKWord = RegExp(
-      r'[\u4E00-\u9FFF\uF900-\uFAFF\u3400-\u4DBF\u3040-\u309F\u30A0-\u30FF\uAC00-\uD7AF]',
-      unicode: true);
-  RegExp rNonCJKWord = RegExp(
-      r'[^\u4E00-\u9FFF\uF900-\uFAFF\u3400-\u4DBF\u3040-\u309F\u30A0-\u30FF\uAC00-\uD7AF\s]+',
-      unicode: true);
+  RegExp rCJKWord =
+      RegExp(r'[\u4E00-\u9FFF\uF900-\uFAFF\u3400-\u4DBF\u3040-\u309F\u30A0-\u30FF\uAC00-\uD7AF]', unicode: true);
+  RegExp rNonCJKWord =
+      RegExp(r'[^\u4E00-\u9FFF\uF900-\uFAFF\u3400-\u4DBF\u3040-\u309F\u30A0-\u30FF\uAC00-\uD7AF\s]+', unicode: true);
 
   switch (mode) {
     case 'cjk':
-      return rCJKWord.allMatches(str).length +
-          rNonCJKWord.allMatches(str).length;
+      return rCJKWord.allMatches(str).length + rNonCJKWord.allMatches(str).length;
     case 'auto':
       return rCJKWord.hasMatch(str)
           ? rCJKWord.allMatches(str).length + rNonCJKWord.allMatches(str).length
@@ -380,6 +355,31 @@ FilterFunction numberOfWords = (dynamic value, List<dynamic> arguments,
     default:
       return str.split(RegExp(r'\s+')).length;
   }
+};
+
+/// Parses a JSON array string into a list.
+///
+/// This function takes a JSON array string and converts it into a list of dynamic items.
+/// If the input value is not a string, it returns the value as is.
+///
+/// - Parameters:
+///   - value: The JSON array string to be parsed.
+///   - arguments: A list of additional arguments (not used in this function).
+///   - namedArguments: A map of named arguments (not used in this function).
+///
+/// - Returns: A list of dynamic items parsed from the JSON array string, or the original value if it is not a string.
+///
+/// Example:
+/// ```dart
+/// parseJsonArray('["apple", "banana", "orange"]', [], {}) // Returns: ['apple', 'banana', 'orange']
+/// ```
+FilterFunction parseJsonArray = (dynamic value, List<dynamic> arguments, Map<String, dynamic> namedArguments) {
+  if (value is! String) return value;
+
+  // Parse the JSON string into a list
+  List<dynamic> items = jsonDecode(value);
+
+  return items;
 };
 
 /// Converts an array to a sentence string.
@@ -392,8 +392,7 @@ FilterFunction numberOfWords = (dynamic value, List<dynamic> arguments,
 /// arrayToSentenceString(['apple', 'banana', 'orange']) // Returns: 'apple, banana, and orange'
 /// arrayToSentenceString(['apple', 'banana'], ['or']) // Returns: 'apple or banana'
 /// ```
-FilterFunction arrayToSentenceString = (dynamic value, List<dynamic> arguments,
-    Map<String, dynamic> namedArguments) {
+FilterFunction arrayToSentenceString = (dynamic value, List<dynamic> arguments, Map<String, dynamic> namedArguments) {
   if (value is! List) throw ArgumentError('Input must be a List');
   String connector = arguments.isNotEmpty ? arguments[0].toString() : 'and';
 
@@ -421,5 +420,8 @@ class StringModule extends Module {
     filters['normalize_whitespace'] = normalizeWhitespace;
     filters['number_of_words'] = numberOfWords;
     filters['array_to_sentence_string'] = arrayToSentenceString;
+    filters['split'] = split;
+    filters['strip'] = strip;
+    filters['parse_json_array'] = parseJsonArray;
   }
 }
