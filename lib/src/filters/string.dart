@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:liquify/src/filter_registry.dart';
 import 'package:liquify/src/filters/module.dart';
 
@@ -382,6 +384,32 @@ FilterFunction numberOfWords = (dynamic value, List<dynamic> arguments,
   }
 };
 
+/// Parses a JSON array string into a list.
+///
+/// This function takes a JSON array string and converts it into a list of dynamic items.
+/// If the input value is not a string, it returns the value as is.
+///
+/// - Parameters:
+///   - value: The JSON array string to be parsed.
+///   - arguments: A list of additional arguments (not used in this function).
+///   - namedArguments: A map of named arguments (not used in this function).
+///
+/// - Returns: A list of dynamic items parsed from the JSON array string, or the original value if it is not a string.
+///
+/// Example:
+/// ```dart
+/// parseJsonArray('["apple", "banana", "orange"]', [], {}) // Returns: ['apple', 'banana', 'orange']
+/// ```
+FilterFunction parseJsonArray = (dynamic value, List<dynamic> arguments,
+    Map<String, dynamic> namedArguments) {
+  if (value is! String) return value;
+
+  // Parse the JSON string into a list
+  List<dynamic> items = jsonDecode(value);
+
+  return items;
+};
+
 /// Converts an array to a sentence string.
 ///
 /// [value]: The array to convert.
@@ -421,5 +449,8 @@ class StringModule extends Module {
     filters['normalize_whitespace'] = normalizeWhitespace;
     filters['number_of_words'] = numberOfWords;
     filters['array_to_sentence_string'] = arrayToSentenceString;
+    filters['split'] = split;
+    filters['strip'] = strip;
+    filters['parse_json_array'] = parseJsonArray;
   }
 }

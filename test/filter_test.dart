@@ -292,6 +292,23 @@ void main() {
       expect(arrayToSentenceString(['apple', 'banana', 'orange'], ['or'], {}),
           equals('apple, banana, or orange'));
     });
+
+    test('parse_json_array', () {
+      expect(
+          parseJsonArray('["a", "b", "c"]', [], {}), equals(['a', 'b', 'c']));
+      expect(parseJsonArray('[1, 2, 3]', [], {}), equals([1, 2, 3]));
+      expect(
+          parseJsonArray('[{"key": "value"}, {"key": "value2"}]', [], {}),
+          equals([
+            {'key': 'value'},
+            {'key': 'value2'}
+          ]));
+      expect(parseJsonArray('[]', [], {}), equals([]));
+      expect(parseJsonArray('[true, false, null]', [], {}),
+          equals([true, false, null]));
+      expect(
+          () => parseJsonArray('invalid json', [], {}), throwsFormatException);
+    });
   });
 
   group('Misc Filters', () {
