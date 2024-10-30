@@ -309,6 +309,36 @@ void main() {
       expect(
           () => parseJsonArray('invalid json', [], {}), throwsFormatException);
     });
+
+    test('parse_json', () {
+      expect(
+          parseJson(
+              '{"type": "root", "children": [{"type":"paragraph", "value":"test", "show": true}]}',
+              [],
+              {}),
+          equals({
+            "type": "root",
+            "children": [
+              {"type": "paragraph", "value": "test", "show": true}
+            ]
+          }));
+      expect(
+          parseJson(
+              '{"type": "root", "children": [{"type":"paragraph", "value":"test\\nwith\\nnewlines", "show": true}]}',
+              [],
+              {}),
+          equals({
+            "type": "root",
+            "children": [
+              {
+                "type": "paragraph",
+                "value": "test\nwith\nnewlines",
+                "show": true
+              }
+            ]
+          }));
+      expect(() => parseJson('invalid json', [], {}), throwsFormatException);
+    });
   });
 
   group('Misc Filters', () {

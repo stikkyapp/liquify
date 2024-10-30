@@ -410,6 +410,27 @@ FilterFunction parseJsonArray = (dynamic value, List<dynamic> arguments,
   return items;
 };
 
+/// Parses a JSON string into a map of dynamic items.
+///
+/// - Parameters:
+///   - value: The JSON string to parse.
+///   - arguments: A list of additional arguments (not used in this function).
+///   - namedArguments: A map of named arguments (not used in this function).
+///
+/// - Returns: A map of dynamic items parsed from the JSON string, or the original value if it is not a string.
+FilterFunction parseJson = (dynamic value, List<dynamic> arguments,
+    Map<String, dynamic> namedArguments) {
+  if (value is! String) return value;
+
+  // Parse the JSON string into a map of dynamic items
+  // Escape newline characters to prevent JSON parsing errors
+  value = value.replaceAll('\n', '\\n').replaceAll('\r', '\\r');
+
+  Map<String, dynamic> map = jsonDecode(value);
+
+  return map;
+};
+
 /// Converts an array to a sentence string.
 ///
 /// [value]: The array to convert.
@@ -452,5 +473,6 @@ class StringModule extends Module {
     filters['split'] = split;
     filters['strip'] = strip;
     filters['parse_json_array'] = parseJsonArray;
+    filters['parse_json'] = parseJson;
   }
 }
