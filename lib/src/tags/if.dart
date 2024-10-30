@@ -10,28 +10,6 @@ class IfTag extends AbstractTag {
 
   IfTag(super.content, super.filters);
 
-  renderBlock(Evaluator evaluator, Buffer buffer, List<ASTNode> body) {
-    for (final subNode in body) {
-      if (subNode is Tag && subNode.name == 'else') {
-        continue;
-      }
-      if (subNode is Tag && subNode.name == 'elseif') {
-        continue;
-      }
-      try {
-        if (subNode is Tag) {
-          evaluator.evaluate(subNode);
-        } else {
-          buffer.write(evaluator.evaluate(subNode));
-        }
-      } on BreakException {
-        throw BreakException();
-      } on ContinueException {
-        throw ContinueException();
-      }
-    }
-  }
-
   @override
   dynamic evaluateWithContext(Evaluator evaluator, Buffer buffer) {
     conditionMet = isTruthy(evaluator.evaluate(content[0]));
@@ -40,29 +18,24 @@ class IfTag extends AbstractTag {
       return n is Tag && n.name == 'else';
     }).firstOrNull;
 
-    final List<Tag> elseIfTags = body
-        .where((ASTNode n) {
-          return n is Tag && n.name == "elseif";
-        })
-        .toList()
-        .cast();
-
     if (conditionMet) {
-      renderBlock(evaluator, buffer, body);
-      return;
-    } else if (elseIfTags.isNotEmpty) {
-      for (var elif in elseIfTags) {
-        if (elif.content.isEmpty) continue;
-        final elIfConditionMet =
-            isTruthy(evaluator.evaluate((elif).content[0]));
-        if (elIfConditionMet) {
-          renderBlock(evaluator, buffer, elif.body);
-          return;
+      for (final subNode in body) {
+        if (subNode is Tag && subNode.name == 'else') {
+          break;
+        }
+        try {
+          if (subNode is Tag) {
+            evaluator.evaluate(subNode);
+          } else {
+            buffer.write(evaluator.evaluate(subNode));
+          }
+        } on BreakException {
+          throw BreakException();
+        } on ContinueException {
+          throw ContinueException();
         }
       }
-    }
-
-    if (elseBlock != null) {
+    } else if (elseBlock != null) {
       for (final subNode in (elseBlock as Tag).body) {
         try {
           if (subNode is Tag) {
