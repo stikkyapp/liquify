@@ -440,6 +440,18 @@ FilterFunction arrayToSentenceString = (dynamic value, List<dynamic> arguments,
 class StringModule extends Module {
   @override
   void register() {
+    filters['append'] = append;
+    filters['prepend'] = prepend;
+    filters['lstrip'] = lstrip;
+    filters['downcase'] = downcase;
+    filters['upcase'] = upcase;
+    filters['remove'] = remove;
+    filters['remove_first'] = removeFirst;
+    filters['remove_last'] = removeLast;
+    filters['rstrip'] = rstrip;
+    filters['split'] = split;
+    filters['strip'] = strip;
+    filters['strip_newlines'] = stripNewlines;
     filters['capitalize'] = capitalize;
     filters['replace'] = replace;
     filters['replace_first'] = replaceFirst;

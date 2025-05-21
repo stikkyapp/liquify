@@ -1,3 +1,35 @@
+## 1.0.3
+- Fix contains operator 
+
+## 1.0.2
+- allow iterating over key value pairs in for tags
+
+## 1.0.1
+- Disable internal resolver/analyzer logging
+
+## 1.0.0
+- Layout tag support
+- Async rendering support
+
+## 1.0.0-dev.2
+- **Template Enhancements:**
+  - Added layout tag support with title filter.
+  - Implemented template analyzer and resolver.
+
+- **Analyzer Improvements:**
+  - Initial support for a static analyzer.
+  - Extensive testing and improvements in static analysis.
+  - Enhanced resolver and analyzer integration.
+
+- **Filter Enhancements:**
+  - Enabled dot notation for array filters.
+
+## 1.0.0-dev.1
+- layout tag support
+
+## 0.8.2
+- Make sure we register all the missing string filters
+  
 ## 0.8.1
 - support elseif tags
 
