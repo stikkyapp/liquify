@@ -42,9 +42,7 @@ Parser tagEnd() => (string('-%}').trim() | string('%}')).labeled('tagEnd');
 Parser filter() {
   return (char('|').trim() &
           ref0(identifier).trim() &
-          (char(':').trim() &
-                  (ref0(namedArgument) | ref0(literal) | ref0(identifier))
-                      .plusSeparated(char(',').trim()))
+          (char(':').trim() & ref0(expression).plusSeparated(char(',').trim()))
               .optional())
       .labeled('filter')
       .map((values) {
@@ -153,11 +151,43 @@ Parser numericLiteral() {
 }
 
 Parser<Literal> stringLiteral() {
-  return (char('"') & pattern('^"').starString() & char('"') |
-          char("'") & pattern("^'").starString() & char("'"))
-      .map((values) {
-    return Literal(values[1], LiteralType.string);
-  }).labeled('stringLiteral');
+  Parser<String> quotedString(String quote) {
+    final backslash = String.fromCharCode(92);
+    final bodyCharPattern = '^$quote$backslash';
+
+    final escapeSequence = (char('\\') & any()).map((values) {
+      final String character = values[1] as String;
+      switch (character) {
+        case 'n':
+          return '\n';
+        case 'r':
+          return '\r';
+        case 't':
+          return '\t';
+        case '"':
+          return '"';
+        case "'":
+          return "'";
+        case '\\':
+          return '\\';
+        default:
+          // Unknown escape sequences keep the backslash and the character.
+          return '\\$character';
+      }
+    }).labeled("quotedString");
+
+    final bodyCharacter = pattern(bodyCharPattern);
+
+    final content =
+        (escapeSequence | bodyCharacter).star().map((values) => values.join());
+
+    return (char(quote) & content & char(quote))
+        .map((values) => values[1] as String);
+  }
+
+  return (quotedString('"') | quotedString("'"))
+      .map((value) => Literal(value, LiteralType.string))
+      .labeled('stringLiteral');
 }
 
 Parser<Literal> booleanLiteral() {
@@ -207,7 +237,7 @@ Parser memberAccess() => (ref0(identifier) &
 Parser arrayAccess() =>
     seq4(ref0(identifier), char('['), ref0(literal), char(']')).map((array) {
       return ArrayAccess(array.$1, array.$3);
-    });
+    }).labeled('arrayAccess');
 
 Parser text() {
   return ((varStart() | tagStart()).neg() | any())
@@ -223,23 +253,24 @@ Parser comparisonOperator() => (string('==').trim() |
         string('>=').trim() |
         char('<').trim() |
         char('>').trim() |
-        string('contains').trim() |
-        string('in').trim())
+        (string('contains') & word().not()).pick(0).trim() |
+        (string('in') & word().not()).pick(0).trim())
     .labeled('comparisonOperator');
 
-Parser logicalOperator() =>
-    (string('and').trim() | string('or').trim()).labeled('logicalOperator');
+Parser logicalOperator() => ((string('and') & word().not()).pick(0).trim() |
+        (string('or') & word().not()).pick(0).trim())
+    .labeled('logicalOperator');
 
 Parser comparison() {
   return (ref0(memberAccess) |
-          ref0(identifier) |
           ref0(literal) |
+          ref0(identifier) |
           ref0(groupedExpression) |
           ref0(range))
       .seq(ref0(comparisonOperator))
       .seq(ref0(memberAccess) |
-          ref0(identifier) |
           ref0(literal) |
+          ref0(identifier) |
           ref0(groupedExpression) |
           ref0(range))
       .map((values) => BinaryOperation(values[0], values[1], values[2]))
@@ -270,7 +301,8 @@ Parser comparisonOrExpression() => (ref0(groupedExpression) |
     .labeled('comparisonOrExpression');
 
 Parser unaryOperator() =>
-    (string('not').trim() | char('!').trim()).labeled('unaryOperator');
+    ((string('not') & word().not()).pick(0).trim() | char('!').trim())
+        .labeled('unaryOperator');
 
 Parser unaryOperation() => (ref0(unaryOperator) & ref0(comparisonOrExpression))
     .map((values) => UnaryOperation(values[0], values[1]))
@@ -278,9 +310,9 @@ Parser unaryOperation() => (ref0(unaryOperator) & ref0(comparisonOrExpression))
 
 Parser range() {
   return (char('(').trim() &
-          (ref0(memberAccess) | ref0(identifier) | ref0(literal)) &
+          (ref0(memberAccess) | ref0(literal) | ref0(identifier)) &
           string('..') &
-          (ref0(memberAccess) | ref0(identifier) | ref0(literal)) &
+          (ref0(memberAccess) | ref0(literal) | ref0(identifier)) &
           char(')').trim())
       .map((values) {
     final start = values[1];
@@ -291,8 +323,8 @@ Parser range() {
 
 Parser arithmeticExpression() {
   return (ref0(groupedExpression) |
-          ref0(identifier) |
           ref0(literal) |
+          ref0(identifier) |
           ref0(range))
       .trim()
       .seq(char('+').trim() |
@@ -300,8 +332,8 @@ Parser arithmeticExpression() {
           char('*').trim() |
           char('/').trim())
       .seq(ref0(groupedExpression) |
-          ref0(identifier) |
           ref0(literal) |
+          ref0(identifier) |
           ref0(range))
       .trim()
       .map((values) {
@@ -353,6 +385,15 @@ Parser<Tag> someTag(String name,
   }).labeled('someTag');
 }
 
+Parser hashBlockComment() => (tagStart() &
+            pattern(' \t\n\r').star() &
+            char('#') &
+            any().starLazy(tagEnd()).flatten() &
+            tagEnd())
+        .map((values) {
+      return TextNode('');
+    }).labeled('hashBlockComment');
+
 Parser tagContent() {
   return (ref0(assignment) | ref0(argument) | ref0(expression))
       .star()
@@ -391,93 +432,159 @@ Parser<Tag> continueTag() =>
 
 Parser<Tag> elseTag() => someTag('else', hasContent: false).labeled('elseTag');
 
-Parser elseBlock() => seq2(
-      ref0(elseTag),
-      ref0(element)
-          .starLazy(ref0(endCaseTag).or(ref0(endIfTag)).or(ref0(endForTag))),
-    ).map((values) {
-      return values.$1.copyWith(body: values.$2.cast<ASTNode>());
-    });
-Parser ifTag() => someTag("if");
-Parser ifBlock() => seq3(
-      ref0(ifTag),
-      ref0(element).starLazy(endIfTag()),
-      ref0(endIfTag),
-    ).map((values) {
-      return values.$1.copyWith(body: values.$2.cast<ASTNode>());
-    });
+Parser ifTag() => someTag("if").labeled('ifTag');
 
-Parser elseIfBlock() =>
-    seq2(ref0(elseifTag), ref0(element).starLazy((elseTag()).or(elseifTag())))
-        .map((values) {
-      return values.$1.copyWith(body: values.$2.cast<ASTNode>());
-    });
-
-Parser elseifTag() => someTag("elseif");
+Parser elsifTag() => someTag("elsif").labeled('elsifTag');
 
 Parser endIfTag() =>
     (tagStart() & string('endif').trim() & tagEnd()).map((values) {
       return Tag('endif', []);
-    });
+    }).labeled('endIfTag');
 
-Parser forBlock() => seq3(
-      ref0(forTag),
-      ref0(element).starLazy(endForTag()),
-      ref0(endForTag),
-    ).labeled('for block').map((values) {
-      return values.$1.copyWith(body: values.$2.cast<ASTNode>());
-    });
-
-Parser<Tag> forTag() => someTag('for');
+Parser forTag() => someTag('for').labeled('forTag');
 
 Parser endForTag() =>
     (tagStart() & string('endfor').trim() & tagEnd()).map((values) {
       return Tag('endfor', []);
-    });
+    }).labeled('endForTag');
 
-Parser caseBlock() => seq3(
-      ref0(caseTag),
-      ref0(element).plusLazy(endCaseTag()),
-      ref0(endCaseTag),
+Parser forElseBranchContent() =>
+    ref0(element).starLazy(ref0(endForTag)).labeled('forElseBranchContent');
+
+Parser elseBlockForFor() => seq2(
+      ref0(elseTag),
+      ref0(forElseBranchContent),
     ).map((values) {
-      return values.$1.copyWith(body: values.$2.cast<ASTNode>());
-    });
+      return (values.$1).copyWith(body: (values.$2 as List).cast<ASTNode>());
+    }).labeled('elseBlockForFor');
 
-Parser<Tag> whenTag() => someTag('when');
+Parser forBlock() => seq4(
+      ref0(forTag),
+      ref0(element).starLazy(
+        ref0(elseTag).or(ref0(endForTag)),
+      ),
+      ref0(elseBlockForFor).optional(),
+      ref0(endForTag),
+    ).map((values) {
+      final forTag = values.$1 as Tag;
+      final forBody = (values.$2).cast<ASTNode>();
+      final elseBlockForFor = values.$3 as Tag?;
 
-Parser<Tag> caseTag() => someTag('case');
+      final List<ASTNode> allBodyNodes = [...forBody];
+      if (elseBlockForFor != null) {
+        allBodyNodes.add(elseBlockForFor);
+      }
+
+      return forTag.copyWith(body: allBodyNodes);
+    }).labeled('forBlock');
+
+Parser<Tag> whenTag() => someTag('when').labeled('whenTag');
+
+Parser<Tag> caseTag() => someTag('case').labeled('caseTag');
 
 Parser endCaseTag() =>
     (tagStart() & string('endcase').trim() & tagEnd()).map((values) {
       return Tag('endcase', []);
-    });
+    }).labeled('endCaseTag');
 
 Parser whenBlock() => seq2(
       ref0(whenTag),
-      ref0(element).starLazy(ref0(endCaseTag).or(ref0(elseTag).or(whenTag()))),
+      ref0(element).starLazy(
+        ref0(whenTag).or(ref0(elseTag)).or(ref0(endCaseTag)),
+      ),
     ).map((values) {
-      return values.$1.copyWith(body: values.$2.cast<ASTNode>());
-    });
+      return (values.$1).copyWith(body: (values.$2).cast<ASTNode>());
+    }).labeled('whenBlock');
+
+Parser elseBlockForCase() => seq2(
+      ref0(elseTag),
+      ref0(element).starLazy(ref0(endCaseTag)),
+    ).map((values) {
+      return (values.$1).copyWith(body: (values.$2).cast<ASTNode>());
+    }).labeled('elseBlockForCase');
+
+Parser caseBlock() => seq3(
+      ref0(caseTag),
+      ref0(element).starLazy(endCaseTag()),
+      ref0(endCaseTag),
+    ).map((values) {
+      return (values.$1).copyWith(body: (values.$2).cast<ASTNode>());
+    }).labeled('caseBlock');
+
+Parser ifBranchContent() => ref0(element)
+    .starLazy(
+      ref0(elsifTag).or(ref0(elseTag)).or(ref0(endIfTag)),
+    )
+    .labeled('ifBranchContent');
+
+Parser elsifBranchContent() => ref0(element)
+    .starLazy(
+      ref0(elsifTag).or(ref0(elseTag)).or(ref0(endIfTag)),
+    )
+    .labeled('elsifBranchContent');
+
+Parser elseBranchContent() =>
+    ref0(element).starLazy(ref0(endIfTag)).labeled('elseBranchContent');
+
+Parser ifBlock() => seq5(
+      ref0(ifTag),
+      ref0(ifBranchContent),
+      ref0(elseIfBlock).star(),
+      ref0(elseBlock).optional(),
+      ref0(endIfTag),
+    ).map((values) {
+      final ifTag = values.$1 as Tag;
+      final ifBody = (values.$2 as List).cast<ASTNode>();
+      final elsifBlocks = (values.$3).cast<Tag>();
+      final elseBlock = values.$4 as Tag?;
+
+      final List<ASTNode> allBodyNodes = [...ifBody];
+      for (var block in elsifBlocks) {
+        allBodyNodes.add(block);
+      }
+      if (elseBlock != null) {
+        allBodyNodes.add(elseBlock);
+      }
+
+      return ifTag.copyWith(body: allBodyNodes);
+    }).labeled('ifBlock');
+
+Parser elseIfBlock() => seq2(
+      ref0(elsifTag),
+      ref0(elsifBranchContent),
+    ).map((values) {
+      final elsifTag = values.$1 as Tag;
+      final elsifBody = (values.$2 as List).cast<ASTNode>();
+      return elsifTag.copyWith(body: elsifBody);
+    }).labeled('elseIfBlock');
+
+Parser elseBlock() => seq2(
+      ref0(elseTag),
+      ref0(elseBranchContent),
+    ).map((values) {
+      final elseTag = values.$1;
+      final elseBody = (values.$2 as List).cast<ASTNode>();
+      return elseTag.copyWith(body: elseBody);
+    }).labeled('elseBlock');
 
 Parser element() => [
       ref0(ifBlock),
-      ref0(elseIfBlock),
       ref0(forBlock),
       ref0(caseBlock),
-      ref0(elseBlock),
       ref0(whenBlock),
-      ref0(breakTag),
-      ref0(continueTag),
+      ref0(elseBlockForCase),
+      ref0(elseBlockForFor),
+      ref0(hashBlockComment),
       ...TagRegistry.customParsers.map((p) => p.parser()),
       ref0(tag),
       ref0(variable),
       ref0(text)
-    ].toChoiceParser();
+    ].toChoiceParser().labeled('element');
 
 Parser<Document> document() => ref0(element).plus().map((elements) {
       var collapsedElements = collapseTextNodes(elements.cast<ASTNode>());
       return Document(collapsedElements);
-    });
+    }).labeled('document');
 
 /// Represents an exception that occurred during parsing.
 ///

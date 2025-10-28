@@ -1,6 +1,4 @@
-import 'package:liquify/src/ast.dart';
-import 'package:liquify/src/context.dart';
-import 'package:liquify/src/evaluator.dart';
+import 'package:liquify/parser.dart';
 import 'package:liquify/src/filter_registry.dart';
 import 'package:liquify/src/registry.dart';
 import 'package:test/test.dart';
@@ -114,6 +112,18 @@ void main() {
           'hello');
     });
 
+    test('parses escaped string literals from parser', () {
+      String render(String source) {
+        final localEvaluator = Evaluator(Environment());
+        return localEvaluator.evaluateNodes(parseInput(source));
+      }
+
+      expect(render(r'{{ "John \"The Man\" Johnson" }}'),
+          'John "The Man" Johnson');
+      expect(render(r'{{ "Line\nBreak" }}'), 'Line\nBreak');
+      expect(render(r'{{ "\\q" }}'), r'\q');
+    });
+
     test('evaluates empty literals on strings', () {
       expect(evaluator.evaluate(Literal('', LiteralType.string)), '');
       expect(evaluator.evaluate(Literal('', LiteralType.string)).isEmpty, true);
@@ -159,15 +169,45 @@ void main() {
           false);
     });
 
-    test('evaluates assignment with filtered expression', () {
-      final assignment = Assignment(
-        Identifier('uppercased_name'),
-        FilteredExpression(Literal('john', LiteralType.string),
-            [Filter(Identifier('capitalize'), [])]),
+    test('evaluates nested assignment with filtered expression', () {
+      // Set up context data
+      evaluator.context.setVariable('paginator', {'current_page': 5});
+
+      final nestedAssignment = Assignment(
+        Identifier('start_page'),
+        FilteredExpression(
+            Assignment(
+                Identifier('start_page'),
+                MemberAccess(
+                    Identifier('paginator'), [Identifier('current_page')])),
+            [
+              Filter(Identifier('minus'), [Literal(2, LiteralType.number)])
+            ]),
       );
 
-      evaluator.evaluate(assignment);
-      expect(evaluator.evaluate(Identifier('uppercased_name')), 'John');
+      evaluator.evaluate(nestedAssignment);
+      expect(evaluator.evaluate(Identifier('start_page')), 3);
+    });
+
+    test('evaluates nested assignment with filtered expression asynchronously',
+        () async {
+      // Set up context data
+      evaluator.context.setVariable('paginator', {'current_page': 5});
+
+      final nestedAssignment = Assignment(
+        Identifier('start_page'),
+        FilteredExpression(
+            Assignment(
+                Identifier('start_page'),
+                MemberAccess(
+                    Identifier('paginator'), [Identifier('current_page')])),
+            [
+              Filter(Identifier('minus'), [Literal(2, LiteralType.number)])
+            ]),
+      );
+
+      await evaluator.evaluateAsync(nestedAssignment);
+      expect(await evaluator.evaluateAsync(Identifier('start_page')), 3);
     });
 
     test('evaluates assignment with filtered expression asynchronously',
