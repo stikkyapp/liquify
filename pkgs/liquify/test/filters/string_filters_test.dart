@@ -1,5 +1,4 @@
 import 'package:liquify/src/filters/string.dart';
-
 import 'package:test/test.dart';
 
 void main() {
@@ -96,26 +95,14 @@ void main() {
     });
 
     test('replaceFirst', () {
-      expect(
-        replaceFirst('Hello Hello', ['Hello', 'Hi'], {}),
-        equals('Hi Hello'),
-      );
-      expect(
-        replaceFirst('Hello World', ['o', 'a'], {}),
-        equals('Hella World'),
-      );
-      expect(
-        replaceFirst('Hello World', ['z', 'a'], {}),
-        equals('Hello World'),
-      );
+      expect(replaceFirst('Hello Hello', ['Hello', 'Hi'], {}), equals('Hi Hello'));
+      expect(replaceFirst('Hello World', ['o', 'a'], {}), equals('Hella World'));
+      expect(replaceFirst('Hello World', ['z', 'a'], {}), equals('Hello World'));
       expect(() => replaceFirst('Hello', ['o'], {}), throwsArgumentError);
     });
 
     test('replaceLast', () {
-      expect(
-        replaceLast('Hello Hello', ['Hello', 'Hi'], {}),
-        equals('Hello Hi'),
-      );
+      expect(replaceLast('Hello Hello', ['Hello', 'Hi'], {}), equals('Hello Hi'));
       expect(replaceLast('Hello World', ['o', 'a'], {}), equals('Hello Warld'));
       expect(replaceLast('Hello World', ['z', 'a'], {}), equals('Hello World'));
       expect(() => replaceLast('Hello', ['o'], {}), throwsArgumentError);
@@ -133,38 +120,20 @@ void main() {
     });
 
     test('truncatewords', () {
-      expect(
-        truncatewords('Hello World Foo Bar', [2], {}),
-        equals('Hello World...'),
-      );
+      expect(truncatewords('Hello World Foo Bar', [2], {}), equals('Hello World...'));
       expect(truncatewords('Hello', [2], {}), equals('Hello'));
-      expect(
-        truncatewords('Hello World Foo Bar', [2, '---'], {}),
-        equals('Hello World---'),
-      );
+      expect(truncatewords('Hello World Foo Bar', [2, '---'], {}), equals('Hello World---'));
     });
 
     test('truncatewords enforces minimum word count', () {
       expect(truncatewords('Hello World Foo Bar', [0], {}), equals('Hello...'));
-      expect(
-        truncatewords('Hello World Foo Bar', [-2], {}),
-        equals('Hello...'),
-      );
+      expect(truncatewords('Hello World Foo Bar', [-2], {}), equals('Hello...'));
     });
 
     test('normalizeWhitespace', () {
-      expect(
-        normalizeWhitespace('Hello   World', [], {}),
-        equals('Hello World'),
-      );
-      expect(
-        normalizeWhitespace('   Hello   World   ', [], {}),
-        equals(' Hello World '),
-      );
-      expect(
-        normalizeWhitespace('Hello\nWorld', [], {}),
-        equals('Hello World'),
-      );
+      expect(normalizeWhitespace('Hello   World', [], {}), equals('Hello World'));
+      expect(normalizeWhitespace('   Hello   World   ', [], {}), equals(' Hello World '));
+      expect(normalizeWhitespace('Hello\nWorld', [], {}), equals('Hello World'));
     });
 
     test('numberOfWords', () {
@@ -176,27 +145,30 @@ void main() {
     });
 
     test('arrayToSentenceString', () {
-      expect(
-        arrayToSentenceString(['apple', 'banana', 'orange'], [], {}),
-        equals('apple, banana, and orange'),
-      );
-      expect(
-        arrayToSentenceString(['apple', 'banana'], [], {}),
-        equals('apple and banana'),
-      );
+      expect(arrayToSentenceString(['apple', 'banana', 'orange'], [], {}), equals('apple, banana, and orange'));
+      expect(arrayToSentenceString(['apple', 'banana'], [], {}), equals('apple and banana'));
       expect(arrayToSentenceString(['apple'], [], {}), equals('apple'));
       expect(arrayToSentenceString([], [], {}), equals(''));
-      expect(
-        arrayToSentenceString(['apple', 'banana', 'orange'], ['or'], {}),
-        equals('apple, banana, or orange'),
-      );
+      expect(arrayToSentenceString(['apple', 'banana', 'orange'], ['or'], {}), equals('apple, banana, or orange'));
     });
 
     test('arrayToSentenceString requires a list input', () {
+      expect(() => arrayToSentenceString('not a list', [], {}), throwsArgumentError);
+    });
+
+    test('parse_json_array', () {
+      expect(parseJsonArray('["a", "b", "c"]', [], {}), equals(['a', 'b', 'c']));
+      expect(parseJsonArray('[1, 2, 3]', [], {}), equals([1, 2, 3]));
       expect(
-        () => arrayToSentenceString('not a list', [], {}),
-        throwsArgumentError,
+        parseJsonArray('[{"key": "value"}, {"key": "value2"}]', [], {}),
+        equals([
+          {'key': 'value'},
+          {'key': 'value2'},
+        ]),
       );
+      expect(parseJsonArray('[]', [], {}), equals([]));
+      expect(parseJsonArray('[true, false, null]', [], {}), equals([true, false, null]));
+      expect(() => parseJsonArray('invalid json', [], {}), throwsFormatException);
     });
   });
 }
